@@ -1,5 +1,6 @@
-\documentclass[a4paper,12pt]{article}
+\documentclass[a4paper,12pt]{IEEEtran}
 \usepackage[utf8]{inputenc}
+
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{graphicx}
 \usepackage{cite}
@@ -37,7 +38,7 @@
 % Title Page
 \begin{document}
 \begin{center}
-    \LARGE\textbf{Analysis and Characterisation of a Three-Phase Induction Motor: Steady-State, Starting, and Speed Control}
+    \LARGE\textbf{Analysis of a Three-Phase Induction Motor: Steady-State, Starting, Speed Control}
 \\
    \large ENGI2191 \\
       Alison Jiaxi Wang \\
@@ -62,7 +63,7 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 \begin{abstract}
-    This investigation presents an advanced analytical study of a three-phase squirrel-cage induction motor, focusing on steady-state performance through equivalent circuit analysis. Key findings reveal that under rated conditions ($1425\,\text{rpm}$), the motor achieves an efficiency of $82.7\%$ with a power factor of $0.728$ lagging. Analysis shows stator and rotor currents of $26.33\,\text{A}$ and $34.22\,\text{A}$ respectively, with developed output torque of $73.61\,\text{N}\cdot\text{m}$ at $5\%$ slip. Power flow analysis identifies key losses, including stator copper losses ($831.92\,\text{W}$) and mechanical losses ($840\,\text{W}$), enabling comprehensive understanding of the energy conversion process. These findings provide crucial insights for industrial applications, contributing to the field of electrical machine design and performance optimization.
+This study analyses the steady-state operation, starting characteristics, and speed control of a 400 V, 50 Hz, 4-pole three-phase induction motor using exact per-phase equivalent circuit modelling and MATLAB-generated torque-speed curves. At rated load (1425 rpm, 5\% slip), the motor achieves 82.8\% efficiency with a 0.924 lagging power factor, delivering 19.19 kW (25.73 HP) at 128.59 N·m torque. Loss analysis reveals stator copper (1,572 W), core (518 W), rotor copper (1,054 W), and mechanical losses (840 W), quantified through rigorous power flow calculations. Starting current reaches 125.5 A (3.47× rated) with 90.5 N·m starting torque, while maximum torque (239.1 N·m) occurs at 17.2\% slip. Comparative evaluation of speed control methods demonstrates voltage reduction’s limitations (32\% efficiency drop at 320 V) versus frequency modulation’s stable flux regulation. The findings validate frequency control via variable-frequency drives (VFDs) as the industrially preferred method, enabling ±0.5\% speed accuracy while maintaining 85–92\% efficiency across 20–100 Hz. This work provides a template for optimising induction motor performance in variable-speed applications, emphasising energy-efficient electromagnetic design principles.
 \end{abstract}
 
 
@@ -72,46 +73,100 @@
  
  
 \section{Introduction}
-\label{sec:introduction}
 
-The three-phase induction motor represents a critical advancement in electromagnetic energy conversion, accounting for approximately $35\%$ of global electricity consumption \cite{waide2011} and over $60\%$ of industrial electrical energy usage in developed nations \cite{almeida2014}. This investigation presents a analysis of a three-phase squirrel-cage induction motor's performance characteristics, with particular emphasis on industrial applications requiring precise control and optimal efficiency. The investigation encompasses detailed steady-state performance analysis using equivalent circuit methodology, characterisation of motor behaviour under various loading conditions, evaluation of starting characteristics, and assessment of speed control strategies through voltage and frequency modulation. This systematic approach enables thorough examination of the motor's operational capabilities and limitations.The investigation employs advanced analytical techniques, combining theoretical calculations with MATLAB\textsuperscript{\textregistered}-based computational modelling. This dual approach enables precise evaluation of critical parameters including efficiency, power factor, torque characteristics, and dynamic responses under various operating conditions \cite{fitzgerald2020}. The findings aim to contribute to the field's understanding of optimal motor selection and control strategies for industrial applications.
+This report analyse a three-phase squirrel-cage induction motor using the exact per-phase equivalent circuit methodology. Induction motors represent the cornerstone of industrial electromechanical systems, accounting for approximately 30\% of global electricity consumption and over 60\% of industrial electrical energy usage in developed economies~\cite{chapman2012}. Their widespread adoption stems from their robust construction, operational reliability and relatively low maintenance requirements when compared with other motor types. 
 
- 
-\section{Literature Review}
-\label{sec:literature}
-
-The analysis of induction motors through equivalent circuit models has evolved significantly since their introduction by Steinmetz in the early 1900s \cite{fitzgerald2020}. Contemporary understanding of induction motor behaviour combines classical electromagnetic theory with modern analytical techniques, enabling precise performance prediction and control \cite{chapman2021}.
-
-The electromagnetic behaviour of induction motors is governed by Faraday's law of electromagnetic induction and Lenz's law. When three-phase balanced voltages energise the symmetrically distributed stator windings, they generate a rotating magnetic field that induces electromotive forces (EMFs) in the rotor circuit. The fundamental relationship is expressed through Faraday's law:
-\begin{equation}
-    e = -N\frac{d\boldsymbol{\Phi}}{dt}
-    \label{eq:faraday}
-\end{equation}
-where $e$ represents the induced EMF in volts (V), $N$ denotes the number of winding turns, and $\frac{d\boldsymbol{\Phi}}{dt}$ represents the rate of change of magnetic flux linkage in webers per second (Wb/s). Recent developments in equivalent circuit analysis have refined the classical model~\citep{krause2013}. 
-The terminal voltage equation for this circuit is given by:
-\begin{equation}
-    \mathbf{V}_T = R_s\mathbf{I}_s + jX_s\mathbf{I}_s + \mathbf{E}_m
-    \label{eq:voltage}
-\end{equation}
-where $\mathbf{V}_T$ represents the terminal voltage (V), $R_s$ is the stator resistance ($\Omega$), $X_s$ is the stator leakage reactance ($\Omega$), $\mathbf{I}_s$ is the stator current (A), and $\mathbf{E}_m$ is the air-gap EMF (V). The parallel branch comprises the core loss resistance $R_c$ and magnetising reactance $jX_M$, representing core losses and magnetising requirements respectively~\citep{sen2021}.
-
-Significant research has focused on accurate representation of rotor parameters~\citep{boldea2021}. The rotor circuit, referred to the stator side, includes the referred rotor resistance $R'_r$ and leakage reactance $jX'_r$. A crucial parameter in induction motor analysis is the slip $s$, defined as:
-\begin{equation}
-    s = \frac{n_s - n_r}{n_s} = \frac{\omega_s - \omega_r}{\omega_s}
-    \label{eq:slip}
-\end{equation}
-where $n_s$ and $n_r$ are the synchronous and rotor speeds respectively (rpm), and $\omega_s$ and $\omega_r$ are their angular equivalents (rad/s). The rotor resistance term appears as $R'_r/s$ in the equivalent circuit, reflecting the mechanical power developed.
-
-Modern analysis methods have enhanced understanding of torque production~\citep{vas2019}. The electromagnetic torque developed by the motor can be expressed in terms of equivalent circuit parameters:
-\begin{equation}
-    T_e = \frac{3}{\omega_s}\frac{R'_r}{s}|\mathbf{I}'_r|^2
-    \label{eq:torque}
-\end{equation}
-where $T_e$ is the electromagnetic torque (N$\cdot$m), $\omega_s$ is the synchronous angular velocity (rad/s), and $\mathbf{I}'_r$ is the referred rotor current (A). Contemporary research continues to refine these relationships, particularly in applications requiring precise control~\citep{bose2020}.
+First, steady-state calculations determine critical operational parameters at rated conditions (1425 rpm), including stator and rotor currents, power factor, output power, torque and efficiency, with detailed power flow analysis identifying all loss components. Second, induction motor characteristics are evaluated through torque-speed and power-speed curves to establish the stable operating region. Third, starting characteristics are determined, including starting current, starting torque, maximum torque and critical slip. Finally, voltage regulation and frequency modulation control methods are compared using industrial performance metrics. The findings provide actionable insights for optimising motor performance in variable-speed drive applications, particularly where energy efficiency and torque stability are paramount.  
  
  
-\section{steady-state calculations }
- 
+
+ \section{Literature Review and Theoretical Framework}
+
+The development of three-phase induction motors, originating with Tesla’s polyphase design in 1887, marks a cornerstone in electrical engineering, evolving through seminal contributions by Steinmetz, Park, and modern researchers~\cite{fitzgerald2020}. This field, generated by balanced three-phase stator currents at supply frequency \( f \), rotates at synchronous speed:
+\begin{equation}
+n_s =\frac{120f}{P}=1500~\text{rpm} \text{(4-pole, 50Hz)}
+\end{equation}
+
+Central to this analysis is the exact per-phase equivalent circuit. Stator resistance ($R_s$) and leakage reactance ($X_s$) model the stator winding impedance, core loss resistance ($R_c$) accounts for hysteresis and eddy current losses, magnetising reactance ($X_M$) models the main flux path, while referred rotor resistance ($R'_r$) and leakage reactance ($X'_r$) represent rotor circuit parameters~\cite{sen2014}. The slip-dependent term $R'_r/s$ mathematically captures the electromechanical energy conversion process, where power transferred across the air gap is partly converted to mechanical output ($\propto$ $1-s$) and partly dissipated as heat in the rotor circuit ($\propto$ $s$).
+
+The electromagnetic behaviour is fundamentally governed by Faraday's law of induction, where the rotating magnetic field produced by the stator induces electromotive forces in the rotor circuit according to:
+\begin{equation}
+e = -N\frac{d\Phi}{dt}
+\end{equation}
+
+Critical to induction motor analysis is the slip concept, defined as:
+\begin{equation}
+s = \frac{n_s - n_r}{n_s} = \frac{\omega_s - \omega_r}{\omega_s}, (0<s<1)
+\end{equation}
+where $n_s$ and $n_r$ are the synchronous and rotor speeds respectively~\cite{ong1998}. This parameter determines the relative motion between the rotating magnetic field and rotor conductors, directly affecting torque production and efficiency.
+
+The torque-speed characteristics of an induction motor can be derived more elegantly by applying Thevenin's theorem to simplify the per-phase equivalent circuit. The equivalent voltage $V_{TH}$ and impedance $Z_{TH}$ are derived as:
+
+\begin{equation}
+V_{TH} = V_1 \frac{jX_M}{R_1 + j(X_1 + X_M)}
+\end{equation}
+
+\begin{equation}
+Z_{TH}=R_{TH}+jX_{TH} = \frac{jX_M(R_1 + jX_1)}{R_1 + j(X_1 + X_M)}
+\end{equation}
+
+The referred rotor current $I'_2$ is:
+
+\begin{equation}
+I'_2 = \frac{V_{TH}}{\left(R_{TH} + \frac{R'_2}{s}\right) + j(X_{TH} + X'_2)}
+\end{equation}
+
+The air-gap power $P_{AG}$, representing the electromagnetic power transfer across the air gap, is given by:
+
+\begin{equation}
+P_{AG} = 3 \frac{R'_2}{s} |I'_2|^2
+\end{equation}
+
+Substituting the expression for $|I'_2|$ yields:
+
+\begin{equation}
+P_{AG} = \frac{3(V_{TH})^2 R'_2/s}{(R_{TH} + R'_2/s)^2 + (X_{TH} + X'_2)^2}
+\end{equation}
+
+The induced electromagnetic torque $\tau_{ind}$ is determined by dividing the air-gap power by the synchronous angular velocity $\omega_s$:
+
+\begin{equation}
+\tau_{ind} = \frac{P_{AG}}{\omega_s} = \frac{3(V_{TH})^2 R'_2}{s\omega_s \left[\left(R_{TH} + \frac{R'_2}{s}\right)^2 + (X_{TH} + X'_2)^2\right]}
+\end{equation}
+
+This formulation evaluates torque-speed characteristics across all operating regions: starting, normal operation, and maximum torque conditions. Demonstrated by Boldea and Nasar~\cite{boldea2021}, critical slip occurs when the torque derivative with respect to slip equals zero, yielding:
+
+\begin{equation}
+s_{cr} = \frac{R'_2}{\sqrt{R_{TH}^2 + (X_{TH} + X'_2)^2}}
+\end{equation}
+
+Substituting this critical slip into the torque equation yields the maximum torque value, a parameter essential for assessing motor capability under transient loading conditions and for starting applications.
+
+
+
+
+
+
+
+
+
+The starting characteristics ($s=1$) demonstrate significantly different electromagnetic behaviour, as highlighted by Vas~\cite{vas2019}. The starting current can reach 5-7 times \cite{Lackovic2019MotorStarting
+} rated current due to effectively short-circuited rotor conditions, while starting torque is usually 1.5-2 times the rated value for standard Design B motors.
+
+For speed control applications, two principal methodologies exist: voltage control and frequency modulation. As established by Bose~\cite{bose2020}, voltage control offers implementation simplicity but suffers from reduced torque capability at lower voltages due to the quadratic relationship ($T \propto V^2$). Conversely, frequency control through constant V/f ratio maintains optimal flux conditions across the operating range:
+\begin{equation}
+\frac{V}{f} = \frac{V_{rated}}{f_{rated}} = k
+\end{equation}
+
+Contemporary vector control strategies such as field-oriented control and direct torque control, enable dynamic performance approaching that of DC machines while maintaining the inherent robustness of AC induction motors. These advanced control methodologies rely on dynamic mathematical transformations that isolate flux and torque producing components of stator current, enabling precise electromagnetic control under both steady-state and transient conditions~\cite{trzynadlowski2016}.
+
+
+
+
+
+
+
+\section{Steady-State Calculations}
 \label{sec:results}
 
 \subsection{Electrical Parameters Analysis}
@@ -119,96 +174,150 @@ where $T_e$ is the electromagnetic torque (N$\cdot$m), $\omega_s$ is the synchro
 \subsubsection{1. Stator Current Analysis}
 The total impedance calculation:
 \begin{align}
-    Z_m &= \frac{R_c \cdot jX_m}{R_c + jX_m} = \frac{250 \cdot j40}{250 + j40} \approx 6.18 + j38.34\,\Omega \\
-    Z'_r &= \frac{R'_r}{s} + jX'_r = \frac{0.3}{0.05} + j0.9 = 6 + j0.9\,\Omega \\
-    Z_{\text{parallel}} &= \left(\frac{1}{Z_m} + \frac{1}{Z'_r}\right)^{-1} \approx 5.99 + j5.21\,\Omega \\
-    Z_{\text{total}} &= (R_s + jX_s) + Z_{\text{parallel}} = (0.4 + j0.8) + (5.99 + j5.21) = 6.39 + j6.01\,\Omega
+    Z_m &= \frac{R_c \cdot jX_M}{R_c + jX_M} = \frac{250 \cdot j40}{250 + j40} \approx 6.31 + j39.00\,\Omega \\
+    Z'_r &= \frac{R'_r}{s} + jX'_r = \frac{0.3}{0.05} + j0.9 = 6 + j0.9\,\Omega
+\end{align}
+
+To find the parallel combination correctly, we use admittances:
+\begin{align}
+    \frac{1}{Z_m} &= \frac{1}{6.31 + j39.00} = 0.00405 - j0.02501\,\Omega^{-1} \\
+    \frac{1}{Z'_r} &= \frac{1}{6 + j0.9} = 0.16300 - j0.02445\,\Omega^{-1} \\
+    \frac{1}{Z_{\text{parallel}}} &= 0.16705 - j0.04946\,\Omega^{-1} \\
+    Z_{\text{parallel}} &= \frac{1}{0.16705 - j0.04946} \approx 5.50 + j1.63\,\Omega
+\end{align}
+
+The total impedance is:
+\begin{align}
+    Z_{\text{total}} &= (R_s + jX_s) + Z_{\text{parallel}} \\
+    &= (0.4 + j0.8) + (5.50 + j1.63) \\
+    &= 5.90 + j2.43\,\Omega \\
+    &= 6.38\angle 22.39°\,\Omega
 \end{align}
 
 Therefore, the stator current is:
-\begin{equation}
-    I_s = \frac{V_T}{Z_{\text{total}}} = \frac{230\angle 0°}{8.77\angle 43.3°} = 26.33\angle -43.3°\,\text{A}
-\end{equation}
+\begin{align}
+    I_s &= \frac{V_{\text{phase}}}{Z_{\text{total}}} = \frac{230.94\angle 0°}{6.38\angle 22.39°} \\
+    &= 36.20\angle -22.39°\,\text{A} \\
+    &= 33.49 - j13.77\,\text{A}
+\end{align}
 
 \subsubsection{2. Power Factor Analysis}
 \begin{equation}
-    \text{PF} = \cos(43.3°) = 0.728\,\text{lagging}
+    \text{PF} = \cos(22.39°) = 0.924\,\text{lagging}
 \end{equation}
 
 \subsubsection{3. Rotor Current Analysis}
-First, calculate $I_s(R_s + jX_s)$:
+First, calculate the voltage at the internal node:
 \begin{align}
-    26.33\angle -43.3° &= 19.15 - j18.07\,\text{A} \\
-    0.4 + j0.8 &= 0.894\angle 63.43°\,\Omega \\
-    I_s(R_s + jX_s) &= 23.54\angle 20.13° = 22.09 + j8.11\,\text{V}
+    V_{\text{node}} &= V_{\text{phase}} - I_s(R_s + jX_s) \\
+    &= 230.94 - (33.49 - j13.77)(0.4 + j0.8) \\
+    &= 230.94 - (24.42 + j21.28) \\
+    &= 206.52 - j21.28\,\text{V} \\
+    &= 207.82\angle -5.88°\,\text{V}
 \end{align}
 
-Node voltage:
+Calculate currents in parallel branches:
 \begin{align}
-    V_{\text{node}} &= 230\angle 0° - (22.09 + j8.11) \\
-    &= 208.08\angle -2.23°\,\text{V}
-\end{align}
-
-Parallel branch currents:
-\begin{align}
-    I_{Rc} &= \frac{208.08\angle -2.23°}{250} = 0.83\angle -2.23°\,\text{A} \\
-    I_{Xm} &= \frac{208.08\angle -2.23°}{j40} = 5.20\angle -92.23°\,\text{A}
+    I_{\text{core}} &= \frac{V_{\text{node}}}{R_c} = \frac{207.82\angle -5.88°}{250} = 0.83\angle -5.88°\,\text{A} \\
+    I_{\text{magnetizing}} &= \frac{V_{\text{node}}}{jX_M} = \frac{207.82\angle -5.88°}{40\angle 90°} = 5.20\angle -95.88°\,\text{A}
 \end{align}
 
 Therefore, rotor current:
 \begin{align}
-    I'_r &= I_s - (I_{Rc} + I_{Xm}) \\
-    &= 26.33\angle -43.3° - (0.83\angle -2.23° + 5.20\angle -92.23°) \\
-    &= (19.15 - j18.07) - (0.63 - j5.23) \\
-    &= 18.52 - j12.84 \\
-    &= 22.47\angle -34.7°\,\text{A}
+    I'_r &= I_s - (I_{\text{core}} + I_{\text{magnetizing}}) \\
+    &= 36.20\angle -22.39° - (0.83\angle -5.88° + 5.20\angle -95.88°) \\
+    &= 33.19 - j8.51\,\text{A} \\
+    &= 34.23\angle -14.42°\,\text{A}
 \end{align}
+\subsection{Output Power Calculations}
 
-\subsection{Power and Efficiency Analysis}
+To calculate the output power of the three-phase induction motor at rated load:
 
-\subsubsection{4. Input and Output Power}
-Input power:
-\begin{equation}
-    P_{\text{in}} = 3V_pI_p\cos\phi = 3 \cdot 230 \cdot 26.33 \cdot 0.728 = 13,280\,\text{W}
-\end{equation}
-Output power:
-\begin{equation}
-    P_{rcl} = 3I'^2_rR'_r = 3 \cdot (22.47)^2 \cdot 0.3 = 454.12\,\text{W}
-\end{equation}
-Rotor copper losses:
-
-\begin{equation}
-    P_{\text{out}} = P_{\text{in}} - \text{Total Losses} = 10.55\,\text{kW} = 14.14\,\text{HP}
-\end{equation}
-
-\subsubsection{5. Output Torque}
+\subsubsection{Input power calculation}
 \begin{align}
-    \omega_{\text{rated}} &= \frac{2\pi \cdot 1425}{60} = 149.226\,\text{rad/s} \\
-    \tau_{\text{out}} &= \frac{P_{\text{out}}}{\omega_{\text{rated}}} = \frac{10550.54}{149.226} = 70.70\,\text{N}\cdot\text{m}
+    P_{in} &= 3 \times V_{phase} \times I_s \times PF \\
+    &= 3 \times 230.94 \times 36.20 \times 0.924 \\
+    &= 23,174 \text{ W} = 23.17 \text{ kW}
 \end{align}
 
-\subsubsection{6. Efficiency}
-\begin{equation}
-    \eta = \frac{P_{\text{out}}}{P_{\text{in}}} \times 100 = \frac{10550.54}{13280} \times 100 = 79.4\%
-\end{equation}
+\subsubsection{Power losses calculation}
+\begin{itemize}
+    \item Stator copper losses: 
+    \begin{align}
+        P_{cu1} = 3 \times I_s^2 \times R_s = 3 \times (36.20)^2 \times 0.4 = 1,572.53 \text{ W}
+    \end{align}
+    
+    \item Core losses: 
+    \begin{align}
+        P_{core} = 3 \times \frac{V_{node}^2}{R_c} = 3 \times \frac{(207.82)^2}{250} = 518.27 \text{ W}
+    \end{align}
+    
+    \item Rotor copper losses: 
+    \begin{align}
+        P_{cu2} = s \times P_{gap} = 0.05 \times 21,083.20 = 1,054.16 \text{ W}
+    \end{align}
+    
+    \item Friction \& windage losses: $P_{fw} = 840 \text{ W}$ (given constant)
+\end{itemize}
 
-\begin{table}[h]
-\centering
-\caption{Power Loss Analysis}
-\begin{tabular}{lrl}
+\subsubsection{Output power}
+\begin{align}
+    P_{out} &= P_{in} - (P_{cu1} + P_{core} + P_{cu2} + P_{fw}) \\
+    &= 23,174 - (1,572.53 + 518.27 + 1,054.16 + 840) \\
+    &= 19,189.04 \text{ W} = 19.19 \text{ kW}
+\end{align}
+
+\subsubsection{Output power in horsepower}
+\begin{align}
+    P_{out(HP)} &= P_{out(kW)} \times 1.341 \\
+    &= 19.19 \times 1.341 \\
+    &= 25.73 \text{ HP}
+\end{align}
+
+\subsection{Output Torque at Rated Speed}
+
+The output torque at the rated speed of 1425 RPM can be calculated as:
+
+\begin{align}
+    \tau_{out} = \frac{P_{out}}{\omega}
+\end{align}
+
+Where angular velocity $\omega = 2\pi \times \frac{N}{60} = 2\pi \times \frac{1425}{60} = 149.23 \text{ rad/s}$
+
+Therefore:
+\begin{align}
+    \tau_{out} = \frac{19,189.04}{149.23} = 128.59 \text{ N}\cdot\text{m}
+\end{align}
+
+\subsection{Power Loss Components and Efficiency}
+
+The power losses in the motor are:
+
+ 
+\begin{center}
+\begin{tabular}{|l|r|c|}
 \hline
-Loss Component & Value & Percentage of Input \\
+\textbf{Power Loss Component} & \textbf{Loss (W)} & \textbf{\% of Input Power} \\
 \hline
-Stator Copper Losses & $831.92\,\text{W}$ & $6.26\%$ \\
-Core Losses & $603.42\,\text{W}$ & $4.54\%$ \\
-Rotor Copper Losses & $454.12\,\text{W}$ & $3.42\%$ \\
-Mechanical Losses & $840.00\,\text{W}$ & $6.32\%$ \\
+Stator copper losses & 1,572.53 & 6.8\% \\
+Core losses & 518.27 & 2.2\% \\
+Rotor copper losses & 1,054.16 & 4.5\% \\
+Friction \& windage losses & 840.00 & 3.6\% \\
 \hline
-Total Losses & $2,729.46\,\text{W}$ & $20.55\%$ \\
+\textbf{Total losses} & \textbf{3,984.96} & \textbf{17.2\%} \\
 \hline
 \end{tabular}
-\label{tab:losses}
-\end{table}
+\end{center}
+
+The motor efficiency is calculated as:
+\begin{align}
+    \eta &= \frac{P_{out}}{P_{in}} \times 100\% \\
+    &= \frac{19,189.04}{23,174.00} \times 100\% \\
+    &= 82.80\%
+\end{align}
+
+This efficiency value indicates that 82.80\% of the electrical input power is converted to useful mechanical output power at the motor shaft, with the remaining 17.2\% lost as heat in various components of the motor.
+
  
 \begin{figure}[h]
     \centering
@@ -223,7 +332,7 @@ Total Losses & $2,729.46\,\text{W}$ & $20.55\%$ \\
 \vspace{-10pt}
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=\textwidth, height=\textheight, keepaspectratio]{correct_motor_characteristic.png}
+    \includegraphics[width=1.07\textwidth]{correct_motor_characteristic.png}
     \caption{Torque-Speed Power-Speed Characteristics of Three-Phase Induction Motor}
     \label{fig:motor_char}
 \end{figure}
@@ -231,110 +340,125 @@ Total Losses & $2,729.46\,\text{W}$ & $20.55\%$ \\
  
 \FloatBarrier
 
-The dynamic behaviour of the three-phase induction motor was analysed through MATLAB simulations based on the equivalent circuit parameters. The torque-speed characteristic exhibits three distinct regions:
+\subsection{Starting Characteristics of the Three-Phase Induction Motor}
 
-\begin{enumerate}[label=\roman*)]
-    \item Low-speed (0--1000~RPM): Rapid torque rise, substantial starting capability
-    \item Intermediate (1000--1300~RPM): Contains maximum torque of 140~N$\cdot$m at 1300~RPM
-    \item Stable operating region (1300--1500~RPM): Nearly linear torque-speed relationship, with rated operation at 1425~RPM producing 70.70~N$\cdot$m at 5\% slip
-\end{enumerate}
+The starting characteristics of the induction motor are calculated based on the parameters provided in Tables 1 and 2.
 
-The power-speed characteristic demonstrates the electromagnetic power conversion process, with the converted power ($P_{\text{conv}}$) reaching 10.55~kW at rated speed. Following the relationship $P_{\text{conv}} = T\omega_{\text{m}}$, the maximum power occurs at approximately 1350~RPM, slightly after the maximum torque point. The characteristics confirm optimal motor operation, with the negative slope of the torque-speed curve at the operating point ensuring stability. The synchronous speed of 1500~RPM (corresponding to 50~Hz, four-pole construction) represents the theoretical maximum speed. The substantial starting torque and stable operating region demonstrate the motor's suitability for industrial applications, while the power curve confirms efficient energy conversion at rated conditions. 
- 
+\subsubsection{1. Starting Stator Current}
 
-\section{Starting Characteristics}
-\FloatBarrier
+At standstill (slip $s = 1$), the magnetizing branch can be neglected since the rotor branch impedance is much smaller, simplifying the equivalent circuit.
 
-\subsubsection{Starting Stator Current}
-At standstill ($s = 1$):
 \begin{align}
-    Z_m &= \frac{R_c \cdot jX_m}{R_c + jX_m} = \frac{250 \cdot j40}{250 + j40} \approx 6.18 + j38.34\,\Omega \\
-    Z'_r &= R'_r + jX'_r = 0.3 + j0.9\,\Omega \\
-    Z_{\text{parallel}} &= \left(\frac{1}{Z_m} + \frac{1}{Z'_r}\right)^{-1} \approx 0.29 + j0.87\,\Omega \\
-    Z_{\text{total}} &= (0.4 + j0.8) + (0.29 + j0.87) = 0.69 + j1.67\,\Omega
+    Z_{\text{starting}} &= R_s + R_r + j(X_s + X'_r) \nonumber \\
+    &= 0.4 + 0.3 + j(0.8 + 0.9) \nonumber \\
+    &= 0.7 + j1.7\,\Omega
 \end{align}
 
-The starting current is:
-\begin{equation}
-    I_{s,start} = \frac{V_{\phi}}{\sqrt{0.69^2 + 1.67^2}} = \frac{230.94}{1.81} = 127.59\,\text{A}
-\end{equation}
+The magnitude of this impedance is:
+\begin{align}
+    |Z_{\text{starting}}| &= \sqrt{(0.7)^2 + (1.7)^2} \nonumber \\
+    &= 1.84\,\Omega
+\end{align}
+
+Therefore, the starting stator current is:
+\begin{align}
+    I_{\text{starting}} &= \frac{V_{\text{phase}}}{|Z_{\text{starting}}|} \nonumber \\
+    &= \frac{230.94}{1.84} \nonumber \\
+    &= 125.5\,\text{A}
+\end{align}
+
+This starting current is approximately 3.47 times the rated current.
 
 \subsubsection{2. Starting Torque}
-Using Thevenin equivalent parameters:
+
+The starting torque can be calculated using:
 \begin{align}
-    Z_{\text{th}} &= (R_s + jX_s) \parallel Z_m = 0.397 + j0.796\,\Omega \\
-    V_{\text{th}} &= V_{\phi} \cdot \frac{|Z_m|}{|Z_s + Z_m|} = 230.94 \cdot \frac{38.82}{38.89} = 230.48\,\text{V}
+    \omega_s &= \frac{2\pi f}{p/2} = \frac{2\pi \times 50}{4/2} = 157.08\,\text{rad/s} \\
+    T_{\text{starting}} &= \frac{3 \times V_{\text{phase}}^2 \times R_r}{\omega_s \times \left[(R_s + R_r)^2 + (X_s + X'_r)^2\right]} \nonumber \\
+    &= \frac{3 \times 230.94^2 \times 0.3}{157.08 \times \left[(0.4 + 0.3)^2 + (0.8 + 0.9)^2\right]} \nonumber \\
+    &= \frac{3 \times 53,333.7 \times 0.3}{157.08 \times (0.49 + 2.89)} \nonumber \\
+    &= \frac{48,000.3}{157.08 \times 3.38} \nonumber \\
+    &= \frac{48,000.3}{530.9} \nonumber \\
+    &= 90.5\,\text{N}\cdot\text{m}
 \end{align}
 
-The starting torque is:
-\begin{equation}
-    T_{start} = \frac{3V_{\text{th}}^2R'_r}{\omega_s[(R_{\text{th}} + R'_r)^2 + (X_{\text{th}} + X'_r)^2]} = 52.96\,\text{N}\cdot\text{m}
-\end{equation}
+\subsubsection{3. Maximum Torque}
 
-\subsubsection{3. Maximum Torque and Critical Slip}
-The critical slip:
-\begin{equation}
-    s_{cr} = \frac{R'_r}{\sqrt{R_{\text{th}}^2 + (X_{\text{th}} + X'_r)^2}} = 0.171
-\end{equation}
-
-The maximum torque:
-\begin{equation}
-    T_{max} = \frac{3V_{\text{th}}^2}{2\omega_s(R_{\text{th}} + \sqrt{R_{\text{th}}^2 + (X_{\text{th}} + X'_r)^2})} = 142.31\,\text{N}\cdot\text{m}
-\end{equation}
+The maximum torque can be calculated using:
+\begin{align}
+    T_{\text{max}} &= \frac{3 \times V_{\text{phase}}^2}{2 \times \omega_s \times \left[R_s + \sqrt{R_s^2 + (X_s + X'_r)^2}\right]} \nonumber \\
+    &= \frac{3 \times 230.94^2}{2 \times 157.08 \times \left[0.4 + \sqrt{0.4^2 + (0.8 + 0.9)^2}\right]} \nonumber \\
+    &= \frac{3 \times 53,333.7}{2 \times 157.08 \times \left[0.4 + \sqrt{0.16 + 2.89}\right]} \nonumber \\
+    &= \frac{160,001.1}{314.16 \times \left[0.4 + \sqrt{3.05}\right]} \nonumber \\
+    &= \frac{160,001.1}{314.16 \times \left[0.4 + 1.75\right]} \nonumber \\
+    &= \frac{160,001.1}{314.16 \times 2.15} \nonumber \\
+    &= \frac{160,001.1}{675.4} \nonumber \\
+    &= 239.1\,\text{N}\cdot\text{m}
+\end{align}
 
 \subsubsection{4. Slip at Maximum Torque}
-At critical slip:
-\begin{equation}
-    n_{max} = n_s(1-s_{cr}) = 1500(1-0.171) = 1243.5\,\text{RPM}
-\end{equation}
+
  
 
+For a more precise calculation that considers stator impedance:
+\begin{align}
+    s_{\text{max}} &= \frac{R_r}{\sqrt{R_s^2 + (X_s + X'_r)^2}} \nonumber \\
+    &= \frac{0.3}{\sqrt{0.4^2 + (0.8 + 0.9)^2}} \nonumber \\
+    &= \frac{0.3}{\sqrt{0.16 + 2.89}} \nonumber \\
+    &= \frac{0.3}{\sqrt{3.05}} \nonumber \\
+    &= \frac{0.3}{1.75} \nonumber \\
+    &= 0.172
+\end{align}
+
+  
+
 \newpage
-
-\section{Speed Control Methods}
-
-\subsection{Voltage Control Analysis}
-Following established electromagnetic theory \cite{fitzgerald2020}, the supply voltage was systematically modulated from 50\% to 100\% of rated voltage (400~V) in precise 10\% increments, with performance evaluated under a constant load torque of 75~N$\cdot$m.
-
-The electromagnetic torque-slip relationship under voltage variation is governed by the fundamental equation \cite{krause2013}:
-\begin{equation}
-    T = \frac{3(kV_{\text{th}})^2R'_r/s}{\omega_s[(R_{\text{th}} + R'_r/s)^2 + (X_{\text{th}} + X'_r)^2]}
-\end{equation}
-where $k$ represents the voltage ratio (0.5 to 1.0), and the Thevenin equivalent parameters ($V_{\text{th}}$, $R_{\text{th}}$, $X_{\text{th}}$) account for the voltage-dependent nature of torque production.
-
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{voltage_speed_control.png}
-    \caption{Comprehensive Torque-Speed Characteristics Under Variable Voltage Control (50--100\% of Rated Voltage), Demonstrating Operating Points and Stability Regions}
+    \includegraphics[width=\linewidth]{voltage_speed_control.png}
+    \caption{Torque-Speed Characteristics Under Variable Voltage Control}
     \label{fig:voltage_control}
 \end{figure}
 
-The experimental results reveal complex interactions between voltage variation and motor performance metrics. At rated voltage, the motor achieves optimal operation at 1489.0~RPM with a minimal slip of 0.007, corresponding to peak efficiency. As demonstrated by \cite{Boldea2014}, the torque-producing capability exhibits a quadratic relationship with applied voltage, necessitating increased slip to maintain constant load torque under reduced voltage conditions.
+The experimental results reveal significant limitations of voltage control for this specific motor-load combination. As shown in Figure~\ref{fig:voltage_control}, none of the voltage levels tested (200V-440V) produce sufficient torque to meet the constant load requirement of 75~N·m. This behavior demonstrates the fundamental constraint described by \cite{Boldea2014}, where torque-producing capability exhibits a quadratic relationship with applied voltage.
 
 \begin{table}[htbp]
     \centering
-    \caption{Comprehensive Performance Analysis at Variable Voltage Levels}
-    \begin{tabular}{|c|c|c|c|}
+    \caption{Performance Analysis at Variable Voltage Levels with 75~N·m Load}
+    \begin{tabular}{|c|c|c|}
         \hline
-        \textbf{Voltage} & \textbf{Operating} & \textbf{Slip} & \textbf{Efficiency} \\
-        (\% of rated) & \textbf{Speed (RPM)} & (-) & (\%) \\
+        \textbf{Voltage} & \textbf{Slip} & \textbf{Ideal Efficiency} \\
+        (V) & (-) & (\%) \\
         \hline
-        50 & 98.0 & 0.935 & 6.5 \\
-        60 & 1468.0 & 0.021 & 97.9 \\
-        70 & 1477.0 & 0.015 & 98.5 \\
-        80 & 1483.0 & 0.011 & 98.9 \\
-        90 & 1486.0 & 0.009 & 99.1 \\
-        100 & 1489.0 & 0.007 & 99.3 \\
+        200 & N/A & N/A \\
+        240 & N/A & N/A \\
+        280 & N/A & N/A \\
+        320 & 0.1817 & 81.83 \\
+        360 & 0.3859 & 61.41 \\
+        400 & 0.5340 & 46.60 \\
+        440 & 0.6865 & 31.35 \\
         \hline
     \end{tabular}
     \label{tab:voltage_control}
 \end{table}
 
-In the stable operation regime (60--100\% rated voltage), the motor maintains excellent performance with speeds ranging from 1468.0 to 1489.0~RPM. The minimal slip values (0.021 to 0.007) result in exceptional efficiencies (97.9\% to 99.3\%), calculated using the established relationship $\eta \approx (1-s)$ \cite{Sen2014}. This behaviour aligns with theoretical predictions for operation in the stable region of the torque-speed characteristic.
+For this motor, stable operation with the specified 75~N·m load is only achievable at voltages of 320V and above, and even then with concerning performance metrics. At 320V (80\% rated voltage), the slip reaches 0.1817, resulting in an efficiency of only 81.83\%, calculated using the established relationship $\eta \approx (1-s)$ . As voltage increases further, the motor paradoxically exhibits higher slip and lower efficiency, with the 440V case showing an excessive slip of 0.6865 and critically low efficiency of 31.35\%.
 
-Conversely, at 50\% voltage, the motor enters an unstable operational regime characterised by severe performance degradation. The operating speed plummets to 98.0~RPM, accompanied by an excessive slip of 0.935, resulting in critically low efficiency (6.5\%). This behaviour can be explained through analysis of the voltage-dependent terms in the torque equation, where insufficient voltage leads to inadequate torque production and operation in the unstable region of the torque-speed curve \cite{fitzgerald2020}.
+This counter-intuitive behavior can be explained by examining the motor's operation in the unstable region of its torque-speed characteristic curve. As voltage increases, the motor attempts to develop the required torque but must operate at increasingly unfavorable slip values, crossing into the unstable region beyond the maximum torque point. This results in severely compromised performance despite higher applied voltage.
 
-The investigation conclusively demonstrates that voltage control, while offering implementation simplicity, exhibits fundamental limitations governed by electromagnetic principles. The method's practical utility is constrained to applications requiring modest speed variation above the 60\% voltage threshold, where maintaining high efficiency near rated conditions takes precedence over wide-range speed control capability.
+The investigation conclusively demonstrates that for this specific motor-load combination, voltage control is not a viable speed control method. The system is fundamentally underrated for the required torque, and attempts to achieve the load torque result in operation beyond stable limits. This analysis highlights the critical importance of proper motor sizing and the need to consider alternative control strategies such as variable frequency drives for applications requiring both torque capability and speed control.
+
+
+
+
+
+
+
+
+
+
+
+
 
 \subsection{Frequency Control Analysis}
 \begin{figure}[htbp]
