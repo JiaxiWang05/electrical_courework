@@ -1,0 +1,4 @@
+phase = pi/2; #quarter-cycle phase shift
+phase = pi;  #shifted by half a cycle
+
+Changing the phase of one frequency component alters the shape of the composite waveform because the components add constructively and destructively at different times. A phase shift of \(\pi/2\) shifts the selected component by one quarter of its period, while a phase shift of \(\pi\) reverses its sign. The frequencies present in the composite signal do not change; only their relative phase and therefore the time-domain waveform change.
