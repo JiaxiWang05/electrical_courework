@@ -1,0 +1,34 @@
+clear all
+close all
+clc
+
+% Sampling settings
+fs = 1000;              % Sampling frequency (Hz)
+t = 0:1/fs:2;           % 2 seconds
+
+% Frequencies
+f1 = 5;                 % Fundamental
+f2 = 10;                % Second harmonic
+f3 = 15;                % Additional component
+
+% Generate individual signals
+x1 = sin(2*pi*f1*t);
+x2 = sin(2*pi*f2*t);
+x3 = sin(2*pi*f3*t);
+
+% Composite signal
+x = x1 + x2 + x3;
+
+% Plot all signals
+figure
+plot(t,x1)
+hold on
+plot(t,x2)
+plot(t,x3)
+plot(t,x,'LineWidth',1.5)
+
+grid on
+xlabel('Time (s)')
+ylabel('Amplitude')
+title('Composite Signal')
+legend('5 Hz','10 Hz','15 Hz','Composite')
