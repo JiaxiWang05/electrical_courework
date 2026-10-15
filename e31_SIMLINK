@@ -1,0 +1,762 @@
+clear all
+close all
+clc
+
+fs = 1000;          % sampling frequency
+t = 0:1/fs:2;       % 2 seconds
+
+f1 = 5;
+f2 = 10;
+f3 = 15;
+
+x1 = sin(2*pi*f1*t);
+x2 = sin(2*pi*f2*t);
+x3 = sin(2*pi*f3*t);
+
+x = x1 + x2 + x3;
+
+figure
+plot(t,x1)
+hold on
+plot(t,x2)
+plot(t,x3)
+plot(t,x,'LineWidth',1.5)
+
+grid on
+xlabel('Time (s)')
+ylabel('Amplitude')
+legend('5 Hz','10 Hz','15 Hz','Composite')
+title('Composite Signal')
+
+phase = pi/2;
+
+x2_phase = sin(2*pi*f2*t + phase);
+x_phase = x1 + x2_phase + x3;
+
+figure
+plot(t,x)
+hold on
+plot(t,x_phase)
+
+grid on
+legend('Original','Phase shifted')
+xlabel('Time (s)')
+ylabel('Amplitude')
+
+A phase shift of \(\pi/2\) shifts the component by a quarter-cycle, while a phase shift of \(\pi\) reverses its sign.
+
+2 × Sine Wave
+1 × Sum
+1 × Product
+1 × Mux
+1 × Scope
+Signal addition and multiplication in Simulink
+
+
+
+Amplitude: 1
+Frequency: 2*pi*10
+Sample time: 0.00001
+
+Amplitude: 1
+Frequency: 2*pi*15
+Sample time: 0.00001
+
+the Simulink Sine Wave block commonly expects angular frequency in rad/s,
+ω=2πf.
+
+Thus:
+
+$$ \omega_1=2\pi(10)=62.83\text{ rad/s} $$
+
+and
+
+ω
+2
+	​
+
+=2π(15)=94.25 rad/s.
+
+Sine 1 ───────────────┐
+Sine 2 ───────────────┤
+Sum output ───────────┤── Mux ── Scope
+Product output ───────┘
+
+Stop time: 1
+Solver type: Fixed-step
+Solver: Discrete (no continuous states)
+Fixed-step size: auto
+
+sinA+sinB=2sin(2A+B​)cos(2A−B​)
+
+x=2sin(2π12.5t)cos(2π2.5t).
+
+sinAsinB=21​[cos(A−B)−cos(A+B)].
+
+fdifference​=15−10=5 Hz
+
+f
+sum
+	​
+
+=15+10=25 Hz.
+
+
+
+N = length(x);
+
+Y = fft(x);
+
+f = (0:N-1)*(fs/N);
+
+figure
+plot(f(1:floor(N/2)), ...
+     abs(Y(1:floor(N/2)))*2/N)
+
+grid on
+xlabel('Frequency (Hz)')
+ylabel('Magnitude')
+title('Single-Sided Magnitude Spectrum')
+xlim([0 30])
+
+5,10,15 Hz.
+
+t = 0:1/fs:2-1/fs;
+
+N=2fs​
+
+Δf=
+N
+
+
+f
+s
+	​
+
+	​
+
+.
+
+x1 = sin(2*pi*5.25*t);
+
+5.25 Hz lies between the 0.5-Hz FFT bins. Its energy therefore spreads across neighbouring frequency bins instead of appearing as one sharp line. That is the spectral leakage the lab asks you to explain.
+
+Frequency resolution is \(\Delta f=f_s/N=1/T\), so increasing the observation time improves frequency resolution. Spectral leakage occurs when the observation interval does not contain an integer number of cycles of a sinusoid, causing discontinuity between the beginning and end of the sampled record. Its energy then spreads into neighbouring FFT bins.
+signal frequency \(f_0=10\) Hz,
+
+$$ N_{\text{samples/cycle}}=\frac{f_s}{f_0}. $$
+
+10 Hz sine wave sampled at 15, 25, 50, 100, and 1000 Hz, show all five cases, calculate samples per cycle, and explain the unusual 15 Hz result.
+
+clear
+close all
+clc
+
+f0 = 10;                        % Signal frequency
+fs_values = [15 25 50 100 1000];
+
+figure
+
+for k = 1:length(fs_values)
+
+    fs = fs_values(k);
+
+    % One second of samples
+    t = 0:1/fs:1-1/fs;
+
+    x = sin(2*pi*f0*t);
+
+    subplot(5,1,k)
+
+    plot(t,x,'o-')
+    hold on
+
+    % Emphasise discrete samples for low sampling rates
+    if fs <= 25
+        stem(t,x)
+    end
+
+    grid on
+    xlabel('Time (s)')
+    ylabel('Amplitude')
+
+    samples_per_cycle = fs/f0;
+
+    title(sprintf('f_s = %d Hz, %.1f samples/cycle', ...
+        fs, samples_per_cycle))
+
+    xlim([0 0.5])
+end
+
+f
+a
+	​
+
+=∣f−nf
+s
+	​
+
+∣,
+
+choose \(n=1\):
+
+$$ f_a=|10-15|=\boxed{5\text{ Hz}}. $$
+
+So your 10 Hz sine appears to be a 5 Hz sine.
+
+As the sampling rate decreases, fewer samples represent each signal cycle and the waveform becomes increasingly discrete. With \(f_s=15\) Hz, the 10 Hz input exceeds the Nyquist frequency of 7.5 Hz and therefore aliases to 5 Hz. A sampling rate of approximately 100 Hz gives 10 samples per cycle and visually represents the 10 Hz waveform much more clearly.
+
+100 Hz sine, generate it initially at 100 kHz, and pass it through a Zero-Order Hold sampling at 500 Hz.
+
+100 Hz Sine ──────────────┐
+                          ├── Mux ── Scope
+100 Hz Sine ── ZOH ───────┘
+
+Parameter	Value
+Sine amplitude	1
+Sine frequency	2*pi*100 rad/s
+Sine sample time	0.00001 s
+ZOH sample time	0.002 s
+ZOH sampling frequency	\(1/0.002=500\) Hz
+
+The original is generated at
+
+$$ f_s=100000\text{ Hz}. $$
+
+The ZOH version is sampled at
+
+$$ f_s=500\text{ Hz}. $$
+
+Since your signal is 100 Hz, this gives
+
+$$ \frac{500}{100}=5 $$
+
+samples per cycle.
+
+On the Scope, the original will look smooth while the ZOH output looks like a staircase, because each sampled value is held constant until the next sample arrives.
+
+There is another useful observation here. With five evenly spaced samples per 100 Hz cycle, your sample positions do not necessarily occur exactly at the \(\pm1\) peaks. With a zero-phase sine starting at \(t=0\), you will see sampled values around \(\pm0.951\), rather than exactly \(\pm1\).
+
+There is another useful observation here. With five evenly spaced samples per 100 Hz cycle, your sample positions do not necessarily occur exactly at the \(\pm1\) peaks. With a zero-phase sine starting at \(t=0\), you will see sampled values around \(\pm0.951\), rather than exactly \(\pm1\).
+
+
+
+For 180 Hz:
+
+$$ f_a=|100-180|=\boxed{80\text{ Hz}}. $$
+
+For 120 Hz:
+
+$$ f_a=|100-120|=\boxed{20\text{ Hz}}. $$
+
+For 80 Hz, subtract one sampling-frequency replica:
+
+f
+a
+	​
+
+=∣100−80∣=
+20 Hz
+	​
+
+.
+
+
+clear
+close all
+clc
+
+f0 = 100;
+fs_values = [500 180 120 80];
+
+expected_alias = zeros(size(fs_values));
+measured_alias = zeros(size(fs_values));
+
+% Fine time signal for reference
+tFine = 0:1/20000:0.1;
+xFine = sin(2*pi*f0*tFine);
+
+figure
+
+for k = 1:length(fs_values)
+
+    fs = fs_values(k);
+
+    % Data for plotting
+    ts = 0:1/fs:0.1;
+    xs = sin(2*pi*f0*ts);
+
+    subplot(4,1,k)
+
+    plot(tFine,xFine)
+    hold on
+    stem(ts,xs)
+
+    grid on
+    xlim([0 0.1])
+
+    xlabel('Time (s)')
+    ylabel('Amplitude')
+    title(sprintf('100 Hz sampled at %d Hz',fs))
+
+    % Expected alias frequency
+    expected_alias(k) = ...
+        abs(mod(f0 + fs/2,fs) - fs/2);
+
+    % Use a 1-second record for FFT measurement
+    tFFT = 0:1/fs:1-1/fs;
+    xFFT = sin(2*pi*f0*tFFT);
+
+    N = length(xFFT);
+    Y = fft(xFFT);
+
+    f = (0:floor(N/2))*fs/N;
+    mag = abs(Y(1:floor(N/2)+1));
+
+    % Ignore DC
+    [~,idx] = max(mag(2:end));
+    idx = idx + 1;
+
+    measured_alias(k) = f(idx);
+end
+
+results = table(fs_values',expected_alias',measured_alias', ...
+    'VariableNames', ...
+    {'SamplingFrequency','ExpectedAlias','MeasuredAlias'});
+
+disp(results)
+
+clear
+close all
+clc
+
+f0 = 100;
+fs_values = [500 180 120 80];
+
+expected_alias = zeros(size(fs_values));
+measured_alias = zeros(size(fs_values));
+
+% Fine time signal for reference
+tFine = 0:1/20000:0.1;
+xFine = sin(2*pi*f0*tFine);
+
+figure
+
+for k = 1:length(fs_values)
+
+    fs = fs_values(k);
+
+    % Data for plotting
+    ts = 0:1/fs:0.1;
+    xs = sin(2*pi*f0*ts);
+
+    subplot(4,1,k)
+
+    plot(tFine,xFine)
+    hold on
+    stem(ts,xs)
+
+    grid on
+    xlim([0 0.1])
+
+    xlabel('Time (s)')
+    ylabel('Amplitude')
+    title(sprintf('100 Hz sampled at %d Hz',fs))
+
+    % Expected alias frequency
+    expected_alias(k) = ...
+        abs(mod(f0 + fs/2,fs) - fs/2);
+
+    % Use a 1-second record for FFT measurement
+    tFFT = 0:1/fs:1-1/fs;
+    xFFT = sin(2*pi*f0*tFFT);
+
+    N = length(xFFT);
+    Y = fft(xFFT);
+
+    f = (0:floor(N/2))*fs/N;
+    mag = abs(Y(1:floor(N/2)+1));
+
+    % Ignore DC
+    [~,idx] = max(mag(2:end));
+    idx = idx + 1;
+
+    measured_alias(k) = f(idx);
+end
+
+results = table(fs_values',expected_alias',measured_alias', ...
+    'VariableNames', ...
+    {'SamplingFrequency','ExpectedAlias','MeasuredAlias'});
+
+disp(results)
+
+Aliasing occurs when the input frequency lies above half the sampling frequency. The sampled data can no longer distinguish the original high-frequency sinusoid from a lower-frequency sinusoid. For example, when the 100 Hz signal is sampled at 180 Hz, it appears at \(|100-180|=80\) Hz.
+
+500 Hz Sine ───────────────┐
+                           ├── Mux ── Scope
+500 Hz Sine ── ZOH ────────┘
+
+Amplitude = 1
+Frequency = 2*pi*500
+Sample time = 0.00001
+
+
+A useful set of experiments is:
+
+\(f_s\)	Ts	Result
+2000 Hz	1/2000	500 Hz, no alias
+800 Hz	1/800	300 Hz alias
+700 Hz	1/700	200 Hz alias
+600 Hz	1/600	100 Hz alias
+
+For example:
+
+Ts = 1/800;
+
+gives
+
+$$ f_a=|500-800|=300\text{ Hz}. $$
+
+Then:
+
+Ts = 1/700;
+
+gives
+
+$$ f_a=|500-700|=200\text{ Hz}. $$
+
+And:
+
+Ts = 1/600;
+
+gives
+
+f
+a
+	​
+
+=∣500−600∣=100 Hz.
+
+Avoid using exactly \(f_s=1000\) Hz as your main demonstration: that places a 500 Hz sine exactly at the Nyquist frequency and the observed samples can depend strongly on phase.
+
+Task 4.1 — Noise and SNR
+
+The lab asks you to add Gaussian noise to a 10 Hz, amplitude-1 sine to obtain approximately 20 dB, 10 dB, and 0 dB SNR, then compare the time and frequency domains. It explicitly permits scaled randn() if awgn() is unavailable.
+
+The definition is
+
+$$ SNR=10\log_{10} \left( \frac{P_{\text{signal}}}{P_{\text{noise}}} \right). $$
+
+Therefore,
+
+P
+noise
+	​
+
+=
+10
+SNR/10
+P
+signal
+	​
+
+	​
+
+
+
+clear
+close all
+clc
+
+rng(1)                 % Repeatable noise
+
+fs = 1000;
+t = 0:1/fs:2-1/fs;
+
+f0 = 10;
+clean = sin(2*pi*f0*t);
+
+Psignal = mean(clean.^2);
+
+snr_values = [20 10 0];
+
+for k = 1:length(snr_values)
+
+    snr_db = snr_values(k);
+
+    Pnoise = Psignal / 10^(snr_db/10);
+    sigma = sqrt(Pnoise);
+
+    noise = sigma*randn(size(clean));
+    noisy = clean + noise;
+
+    % FFTs
+    N = length(clean);
+
+    Yclean = fft(clean);
+    Ynoisy = fft(noisy);
+
+    f = (0:floor(N/2))*fs/N;
+
+    magClean = abs(Yclean(1:floor(N/2)+1))*2/N;
+    magNoisy = abs(Ynoisy(1:floor(N/2)+1))*2/N;
+
+    figure
+
+    subplot(2,1,1)
+    plot(t,clean)
+    hold on
+    plot(t,noisy)
+    xlim([0 0.5])
+    grid on
+
+    xlabel('Time (s)')
+    ylabel('Amplitude')
+    title(sprintf('Time Domain, SNR = %d dB',snr_db))
+    legend('Clean','Noisy')
+
+    subplot(2,1,2)
+    plot(f,magClean)
+    hold on
+    plot(f,magNoisy)
+    xlim([0 100])
+    grid on
+
+    xlabel('Frequency (Hz)')
+    ylabel('Magnitude')
+    title(sprintf('Frequency Domain, SNR = %d dB',snr_db))
+    legend('Clean','Noisy')
+end
+
+N-bit quantiser over a nominal ±1 range, with
+
+$$ Q=\frac{2}{2^N}, $$
+
+and asks for \(N=4,8,12\), the RMS quantisation error, and comparison with
+
+e
+RMS
+	​
+
+≈
+12
+	​
+
+Q
+	​
+
+.
+
+                 ┌──────────── Quantizer ─────────────┐
+Sine ────────────┤                                    ├── Scope
+  │              └────────────────────────────────────┘
+  │
+  └──────────────────┐
+                     │ +
+Quantized ────────────┤ -   Sum ── To Workspace
+
+Frequency = 2*pi*1
+Amplitude = 0.9
+Sample time = 0.001
+
+Nbits = 4;
+Q = 2/(2^Nbits);
+
+Quantization interval = Q
+
+Nbits = 8;
+Q = 2/(2^Nbits);
+
+Nbits = 12;
+Q = 2/(2^Nbits);
+
+err = out.qerr.data;
+
+rms_error = sqrt(mean(err.^2));
+
+theoretical = Q/sqrt(12);
+
+fprintf('Measured RMS = %.8f\n',rms_error)
+fprintf('Theory RMS   = %.8f\n',theoretical)
+
+If you want to explicitly model a real ±1 ADC range, put a Saturation block before the Quantizer:
+
+Lower limit = -1
+Upper limit = +1
+
+Then, if the signal exceeds ±1, it clips and the error rises sharply.
+
+The script defines the moving average as
+
+$$ y[n]=\frac{1}{N} \left( x[n]+x[n-1]+\cdots+x[n-N+1] \right) $$
+
+and asks you to compare \(N=5\) and \(N=20\) for a noisy 5 Hz signal.
+
+I'll use a 10 dB noisy signal as a concrete test condition. The script doesn't prescribe the noise SNR for this task.
+
+clear
+close all
+clc
+
+rng(1)
+
+fs = 1000;
+t = 0:1/fs:2-1/fs;
+
+f0 = 5;
+
+clean = sin(2*pi*f0*t);
+
+% Create approximately 10 dB SNR
+Psignal = mean(clean.^2);
+SNRdB = 10;
+
+Pnoise = Psignal/10^(SNRdB/10);
+noise = sqrt(Pnoise)*randn(size(clean));
+
+noisy = clean + noise;
+
+% Moving-average filters
+b5 = ones(1,5)/5;
+b20 = ones(1,20)/20;
+
+y5 = filter(b5,1,noisy);
+y20 = filter(b20,1,noisy);
+
+figure
+plot(t,noisy)
+hold on
+plot(t,y5,'LineWidth',1.2)
+plot(t,y20,'LineWidth',1.5)
+
+grid on
+xlim([0 1])
+
+xlabel('Time (s)')
+ylabel('Amplitude')
+title('Moving Average Filtering')
+legend('Noisy','N = 5','N = 20')
+
+clear
+close all
+clc
+
+rng(1)
+
+fs = 1000;
+t = 0:1/fs:2-1/fs;
+
+f0 = 5;
+
+clean = sin(2*pi*f0*t);
+
+% Create approximately 10 dB SNR
+Psignal = mean(clean.^2);
+SNRdB = 10;
+
+Pnoise = Psignal/10^(SNRdB/10);
+noise = sqrt(Pnoise)*randn(size(clean));
+
+noisy = clean + noise;
+
+% Moving-average filters
+b5 = ones(1,5)/5;
+b20 = ones(1,20)/20;
+
+y5 = filter(b5,1,noisy);
+y20 = filter(b20,1,noisy);
+
+figure
+plot(t,noisy)
+hold on
+plot(t,y5,'LineWidth',1.2)
+plot(t,y20,'LineWidth',1.5)
+
+grid on
+xlim([0 1])
+
+xlabel('Time (s)')
+ylabel('Amplitude')
+title('Moving Average Filtering')
+legend('Noisy','N = 5','N = 20')
+
+
+5 Hz Sine ───────┐
+                 │
+100 Hz Sine ─────┼── Sum ─────┬───────────────┐
+                 │            │               │
+Noise ───────────┘            │               │
+                              │      Discrete FIR Filter
+                              │               │
+                              └───────┐       │
+                                      Mux ─── Scope
+
+
+
+
+                                      For each test, define:
+
+N = 5;
+
+and put:
+
+ones(1,N)/N
+
+in the FIR numerator field.
+
+Then test:
+
+N = 5;
+N = 10;
+N = 20;
+
+
+he script notes that the first null of an \(N\)-sample moving average occurs approximately at
+
+$$ f_{\text{null}}=\frac{f_s}{N}. $$
+
+With \(f_s=1000\) Hz:
+
+For \(N=5\),
+
+$$ f_{\text{null}}=200\text{ Hz}. $$
+
+For \(N=10\),
+
+$$ f_{\text{null}}=100\text{ Hz}. $$
+
+For \(N=20\),
+
+f
+null
+	​
+
+=50 Hz.
+
+With \(f_s=1000\) Hz, an \(N=10\) moving average has its first frequency-response null at 100 Hz, so it strongly suppresses the unwanted 100 Hz component while retaining the 5 Hz component. Increasing to \(N=20\) provides stronger smoothing but produces greater delay and more attenuation of useful higher-frequency content
+
+
+
+
+Task 6.1 — Direct Digital Synthesis in MATLAB
+
+The script specifies:
+
+$$ f_c=10\,000\text{ Hz} $$
+
+a 16-bit phase accumulator, a 256-point sine lookup table, and an intended output of 100 Hz. The DDS equation is
+
+$$ f_{\text{out}} = \frac{M f_c}{2^N}. $$
+
+Rearrange:
+
+$$ M= \frac{f_{\text{out}}2^N}{f_c}. $$
+
+For 100 Hz:
+
+M=
+10000
+100(65536)
+	​
+
+=655.36.
