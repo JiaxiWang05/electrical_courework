@@ -1,0 +1,16 @@
+phase = pi/2;
+
+x2_phase = sin(2*pi*f2*t + phase);
+
+x_phase = x1 + x2_phase + x3;
+
+figure
+plot(t,x,'LineWidth',1.5)
+hold on
+plot(t,x_phase,'LineWidth',1.5)
+
+grid on
+xlabel('Time (s)')
+ylabel('Amplitude')
+title('Effect of Phase Shift')
+legend('Original composite','Phase-shifted composite')
